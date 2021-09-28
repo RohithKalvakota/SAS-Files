@@ -1,119 +1,107 @@
 *Part A;
 
-data sale;
-input EmployeeID FName $ LName $ Gender $ JobTitle $ Country $ Birthdate ddmmyy8. Salary Hiredate ddmmyy8.;
-datalines;
-1 Suraj Joshi M Manager IND 12021987 150000 26052019
-2 John Doe M Manager ENG 06051983 250000 13072017
-3 Lucy James F SalesRep1 DEN 01071990 175000 27062020
-4 Mark Robin M SalesManager AUS 26081989 85000 15092015
-5 Reena Joshi F SalesRep2 AUS 17101983 140000 23052021
-6 Clark Donald M Manager CNA 20021980 167000 26052019
-7 Tom Mark M SalesManager USA 14111992 65000 15052022
-8 Ryleigh Matthew F SalesRep2 AUS 01021979 75000 14071999
-9 John Cho M Manager JPN 22081979 90000 22042015
-10 David Johnson M SalesManager RSA 29091975 17200 16032010
-;
+*Subpart 1;
 
-data salesubset;
-set work.sale;
-where Country = "AUS" and JobTitle contains "Rep";
+data salessubset;
+	infile "/home/u58422688/sales.csv" dlm=',';
+	input EmployeeId FName $ LName $ Gender $ Salary Jobtitle $ Country $ Birthdate:DATE9. Hiredate:mmddyy10.;
 run;
 
-proc print data = salesubset noobs;
-format Birthdate date9. Hiredate date9.;
+*Subpart 2;
+
+proc print data = salessubset noobs;
+format Birthdate ddmmyy10. Hiredate ddmmyy10.;
+run;
+
+*Subpart 3;
+proc print data = salessubset noobs;
+format Salary Dollar8. Birthdate ddmmyy10. Hiredate ddmmyy10.;
+run;
+
+*Subpart 4;
+
+proc format;
+value $Genderfmt
+"F" = "Female"
+"M" = "Male";
+run;
+
+proc format;
+value $Countryfmt
+"AU" = "Australia"
+"US" = "America";
+run;
+
+proc print data=salessubset noobs;
+format Gender $Genderfmt. Country $Countryfmt. Salary Dollar8. Birthdate ddmmyy10. Hiredate ddmmyy10.;
+run;
+
+*Subpart 5;
+
+proc print data = salessubset noobs;
+format Gender $Genderfmt. Country $Countryfmt. Salary Dollar8. Birthdate date9. Hiredate date9.;
 run;
 
 *Part B;
 
-data salesubset;
-set work.sale;
+*Subpart 1;
+
+data salessubset;
+infile "/home/u58422688/sales.csv" dlm=',';
+input EmployeeId FName $ LName $ Gender $ Salary Jobtitle $ Country $ Birthdate:DATE9. Hiredate:mmddyy10.;
+run;
+
+data salessub;
+set work.salessubset;
 Bonus = Salary * 0.10;
-where Country = "AUS" and JobTitle contains "Rep" and Hiredate < '01JAN2000'd;
 run;
 
-proc print data = salesubset noobs;
-format Birthdate date9. Hiredate date9.;
+proc print data = salessub noobs;
+format Birthdate ddmmyy10. Hiredate ddmmyy10.;
 run;
 
-*Part C Subpart 1;
+*Subpart 2;
 
-data salesubset;
-set work.sale;
-Bonus = Salary * 0.10;
-where Country = "AUS" and JobTitle contains "Rep" and Hiredate < '01JAN2000'd;
-drop EmployeeID Gender Country Birthdate;
+data salessubset;
+infile '/home/u58422688/sales.csv' dlm=',';
+input EmployeeId First_Name:$15. Last_Name:$18. Gender:$1. Salary Job_Title:$20. Country:$3. 
+Birth_Date:Date9. Hire_Date:mmddyy10.;
 run;
 
-proc print data = salesubset noobs;
-format Hiredate date9.;
+data salessub;
+set work.salessubset;
+Bonus = 0.10 * Salary;
+keep EmployeeId First_Name Gender Salary Bonus;
+if Bonus > 500;
 run;
 
-*Part C Subpart 2;
-
-data salesubset;
-set work.sale;
-Bonus = Salary * 0.10;
-where Country = "AUS" and JobTitle contains "Rep" and Hiredate < '01JAN2000'd;
-keep FName LName Salary JobTitle Hiredate Bonus;
+proc print data = salessub noobs;
 run;
 
-proc print data = salesubset noobs;
-format Hiredate date9.;
+*Subpart 3;
+
+data Phone2;
+infile '/home/u58422688/phone2.csv' dlm= ',' dsd;
+input Name:$20. Home_Number:$15. Office_Number:$15.;
 run;
 
-*Part C Subpart 3;
-
-data salesubset;
-set work.sale;
-Bonus = Salary * 0.10;
-where Hiredate < '01APR2020'd;
+proc print data = Phone2 noobs;
 run;
 
-proc print data = salesubset noobs;
-format Birthdate date9. Hiredate date9.;
+data Phone;
+infile '/home/u58422688/phone.csv' dlm= ',' missover; 
+input Name:$20. Home_Number:$15. Office_Number:$15.;
 run;
 
-*Part D Subpart 1;
-
-data StockDemo;
-set SASHELP.stocks;
-Facevalue = Open * 0.10;
-drop High Low Volume;
+proc print data = Phone noobs;
 run;
 
-proc print data = StockDemo noobs;
-run;
+*Subpart 4;
 
-*Part D Subpart 2;
-
-data StockDemo;
-set SASHELP.stocks;
-Facevalue = Open * 0.10;
-keep Stock Volume Facevalue;
-run;
-
-proc print data = StockDemo noobs;
-run;
-
-*Part D Subpart 3;
-
-data StockDemo;
-set SASHELP.stocks;
-Facevalue = Open * 0.10;
-format Stock $2.;
-run;
-
-proc print data = StockDemo noobs;
-run;
-
-*Part D Subpart 4;
-
-data StockDemo;
-set SASHELP.stocks;
-Facevalue = Open * 0.10;
-format Open Dollar8.2 Facevalue Dollar8.2;
-run;
-
-proc print data = StockDemo noobs;
+proc print data = Phone2 label noobs;
+title "Employees with their Contact Details";
+label Name = 'Name'
+	  Office_Number = 'Office Number'
+	  Home_Number = 'Home Number';
+footnote "Confidential Data";
 run;
