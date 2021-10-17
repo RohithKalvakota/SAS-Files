@@ -1,0 +1,105 @@
+*Scenario 1;
+
+data sales;
+infile '/home/u58422688/sales.csv' dlm=',';
+input EmployeeId First_Name:$15. Last_Name:$18. Gender:$1. Salary Job_Title:$20. Country:$3.
+Birth_Date:Date9. Hire_Date:mmddyy10.;
+run;
+
+proc format;
+value new_tiers 
+  0 - 50000='Tier1'
+  50000 - 100000 ='Tier2'
+  100000 - 250000='Tier3';
+run;
+proc print data=sales noobs;
+format salary new_tiers. Birth_Date ddmmyy10. Hire_Date ddmmyy10.;
+run;
+
+*Scenario 2;
+
+data salessubset;
+set sales;
+Bonus = Salary * 0.10;
+where Country = "AU" and Job_Title contains "Rep" and Hire_Date < '01JAN2000'd;
+run;
+proc print data = salessubset noobs;
+format Birth_Date ddmmyy10. Hire_Date ddmmyy10.;
+run;
+
+*Scenario 3;
+
+data salessubset;
+set sales;
+drop EmployeeId Gender Country Birth_date;
+run;
+
+proc print data = salessubset noobs;
+format Hire_Date ddmmyy10.;
+run;
+
+*Scenario 5;
+
+data emp1;
+input EmployeeID Fname $ Lname $ Gender $ JobTitle $ Region $;
+datalines;
+1 Snell Joshi M Manager DEN
+2 John Abraham M Manager DEN
+3 Lucy Morning F SalesRep1 DEN
+4 Troll Robin M SalesManager DEN
+5 Anjani Joshi F SalesRep2 DEN
+;
+
+data emp2;
+input EmployeeID Fname $ Lname $ Gender $ JobTitle $ Country $;
+datalines;
+6 Trump Donald M Manager FRA
+7 Tom Cruise M SalesManager FRA
+8 Raymond Matthew F SalesRep2 FRA
+9 Dohn Choc M Manager FRA
+10 David Beckerman M SalesManager FRA
+;
+
+data empc2;
+set emp1 emp2 (rename=(Country=Region));
+run;
+
+proc print data = empc2 noobs;
+run;
+
+*Scenario 6;
+
+data empsau;
+input Fname $ Gender $ EmpID ;
+datalines;
+John M 121150
+Laura F 121151
+Dorothy F 121152
+;
+
+data phones;
+input EmpID Type $ Phone $16.;
+datalines;
+121150 Home +912535645867
+121150 Work +918956243569
+121151 Home +914526325547
+121152 Work +917854925634
+121152 Home +911254388594
+121152 Cell +915268648953
+;
+
+proc sort data = empsau;
+by descending EmpID;
+run;
+
+proc sort data = phones;
+by descending EmpID;
+run;
+
+data mergeset;
+merge empsau phones;
+by descending EmpID;
+run;
+
+proc print data=mergeset noobs;
+run;
