@@ -1,0 +1,81 @@
+*Scenario 1;
+
+data Scenario1;
+infile '/home/u58422688/sales.csv' dlm=',';
+input EmployeeId First_Name:$15. Last_Name:$18. Gender:$1. Salary Job_Title:$20. Country:$3.
+Birth_Date:Date9. Hire_Date:mmddyy10.;
+Bonus=500;
+Compensation = sum(Salary,Bonus);
+BonusMonth = month(Hire_Date);
+run;
+
+title "Bonus and Compensation Allotment of Employee in the hired month";
+proc print data=Scenario1 noobs;
+format Birth_Date ddmmyy10. Hire_Date ddmmyy10. Bonus dollar4. Salary dollar10. Compensation dollar10.;
+run;
+title;
+
+*Scenario 2;
+
+data Scenario2;
+infile '/home/u58422688/sales.csv' dlm=',';
+input EmployeeId First_Name:$15. Last_Name:$18. Gender:$1. Salary Job_Title:$20. Country:$3.
+Birth_Date:Date9. Hire_Date:mmddyy10.;
+Compensation = sum(Salary,Bonus);
+BonusMonth = month(Hire_Date);
+if country='US' then do;
+bonus=500;
+Freq='Once a year';
+end;
+else if country='AU' then do;
+bonus=300;
+Freq='Twice a year';
+end;
+run;
+
+title"Alloting Bonus on the basis of Country";
+proc print data=Scenario2 noobs;
+format Birth_Date ddmmyy10. Hire_Date ddmmyy10. Bonus dollar4. Salary dollar10. Compensation dollar10.;
+run;
+title;
+
+*Business Scenario 3;
+
+data demo;
+input Employee_ID qtr1 qtr2 qtr3 qtr4;
+datalines;
+100 50 50 45 40
+200 20 30 40 50
+300 20 30 40 50
+400 40 30 50 60
+;
+run;
+
+data percent(drop=i);
+   set demo;
+   array contrib{4} qtr1-qtr4;
+   array Pct{4};
+   Total=sum(of contrib{*});
+   do i=1 to 4;
+      pct{i}=contrib{i}/Total;
+   end;
+run;
+proc print data=percent noobs;
+   var Employee_ID Pct1-Pct4;
+   format Pct1-Pct4 percent6.;
+run;
+
+*Business Scenario 4;
+
+data compare(drop=i);
+   set demo;
+   array contrib{4} Qtr1-Qtr4;
+   array Diff{4};
+   array goal{4} _temporary_ (10,20,20,15);
+   do i=1 to 4;
+      diff{i}=(contrib{i}-goal{i});
+   end;
+run;
+proc print data=compare noobs;
+   var Employee_ID Qtr1-Qtr2 Diff1-Diff4;
+run;
